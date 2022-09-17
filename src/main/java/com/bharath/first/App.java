@@ -28,7 +28,7 @@ public class App
     	
     	ApplicationContext conp = new ClassPathXmlApplicationContext("spring.xml");
     	
-    	companyEmployee emp = (companyEmployee) conp.getBean("comemployee");
+    	CompanyEmployee emp = (CompanyEmployee) conp.getBean("comemployee");
         emp.Employee();
        
     	}catch (Exception e) {

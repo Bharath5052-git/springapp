@@ -1,6 +1,6 @@
 package com.bharath.first;
 
-public interface companyEmployee {
+public interface CompanyEmployee {
 	
 	void Employee ();
 
