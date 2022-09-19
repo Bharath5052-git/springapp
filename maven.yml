@@ -1,86 +1,17 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+name: Java CI
 
-name: Java CI with Maven
-
-on: [push, workflow_dispatch]
-
-env:
-  # JFrog platform url (for example: https://acme.jfrog.io)
-  # JF_URL: ${{ secrets.JF_URL }}
-  # Basic authentication credentials
-  # JF_USER: ${{ secrets.JF_USER }}
-  # JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
-  JF_URL: "http://${{ secrets.SCM_MAVEN_IP }}"
-  JF_USER: ${{ secrets.SCM_MAVEN_USER }}
-  JF_PASSWORD: ${{ secrets.SCM_MAVEN_PW }}
+on: [push]
 
 jobs:
-  #build:
-  node-docker:
+  build:
     runs-on: ubuntu-latest
-    container:
-          image: dockerbase/java7:latest
 
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Generate build number
-      uses: einaregilsson/build-number@v3
-      with:
-        token: ${{secrets.github_token}}
-
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-
-    - name: Run find-and-replace to remove / from branch
-      uses: mad9000/actions-find-and-replace-string@1
-      id: repobranchname
-      with:
-        source: "${{ github.repository }}::${{ steps.extract_branch.outputs.branch }}"
-        find: '/'
-        replace: '::'
-
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.4
-      with:
-        maven-version: 3.8.2
-
-    - name: create m2 folder
-      run: |
-        mkdir ~/.m2
-        chmod -R 755 ~/.m2
-        echo "hi" > ~/.m2/hi.txt
-        echo "hi" > ~/.m2/settings.xml
-        cat ~/.m2/hi.txt
-        cat ~/.m2/settings.xml
-
-
-    - name: configuring settings.xml
-      uses: canastro/copy-file-action@master
-      with:
-        source: "configure/settings.xml"
-        target: "~/.m2/settings.xml"
-
-    - name: Build with Maven
-      run: |
-        java -version
-        mvn -version
-        cat ~/.m2/settings.xml
-        # mkdir ~/.m2
-        # echo "<settings><servers><server><id>snapshots</id><url>${JF_URL}/artifactory/maven-dev-local</url><username>${JF_USER}</username><password>${JF_PASSWORD}</password></server></servers></settings>" > ~/.m2/settings.xml
-
-        echo "Run Clean .............................."
-        mvn -Dhttps.protocols=TLSv1.2 clean
-        echo "Finished Clean .............................."
-        echo "Run Install .............................."
-        mvn -Dhttps.protocols=TLSv1.2 install
-        echo "Finished Install .............................."
-
-     - name: Publish
-      run: mvn deploy
-
-
-
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build with Maven
+        run: mvn jar:jar 
